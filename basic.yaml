@@ -1,0 +1,86 @@
+esphome:
+  name: home_test
+  platform: ESP8266
+  board: nodemcuv2
+
+wifi:
+  ssid: "ssid"
+  password: "password"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Home Test Fallback Hotspot"
+    password: "password"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: 'admin'
+
+ota:
+  password: 'admin'
+
+i2c:
+# - sda: D3
+#   scl: D4
+#   id: i2c_bus1
+#   scan: True
+- sda: D2
+  scl: D1
+  id: i2c_bus2
+  scan: True
+  
+sensor:
+  - platform: dht
+    pin: D5
+    temperature:
+      name: "tem"
+      id: "temperature"
+    humidity:
+      name: "hum"
+      id: "humidity"
+    update_interval: 1s
+    model: DHT11
+
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 1s
+    id: "wifi0"
+    
+  - platform: bh1750
+    id: "light"
+    name: "lux"
+    address: 0x23
+    update_interval: 1s
+
+switch:
+  - platform: gpio
+    name: "stairs_light"
+    pin:
+      number: D0
+      inverted: yes
+
+web_server:
+  port: 80 
+  
+font:
+  - file: "Sansation-Regular.ttf"
+    id: my_font
+    size: 12
+    
+      
+display:
+  - platform: ssd1306_i2c
+    i2c_id: i2c_bus2
+    model: "SSD1306 128x64"
+    address: 0x3C
+    lambda: |-
+      it.printf(0, 10, id(my_font), "Tem: %.1f Celsius", id(temperature).state);
+      it.printf(0, 25, id(my_font), "Hum: %.1f Perc", id(humidity).state);
+      it.printf(0, 40, id(my_font), "Light: %.1f Lux", id(light).state);
+      it.printf(0, 55, id(my_font), "Wifi: %.2f", id(wifi0).state);
+  
